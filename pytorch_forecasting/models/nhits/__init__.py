@@ -6,6 +6,7 @@ from typing import Dict, List, Optional, Tuple, Union
 
 from matplotlib import pyplot as plt
 import numpy as np
+from pytorch_lightning.loggers import TensorBoardLogger
 import torch
 from torch import nn
 
@@ -523,17 +524,20 @@ class NHiTS(BaseModelWithCovariates):
                 name += f"step {self.global_step}"
             else:
                 name += f"batch {batch_idx}"
-            self.logger.experiment.add_figure(name, fig, global_step=self.global_step)
+            if isinstance(self.logger, TensorBoardLogger):
+                self.logger.experiment.add_figure(name, fig, global_step=self.global_step)
             if isinstance(fig, (list, tuple)):
                 for idx, f in enumerate(fig):
-                    self.logger.experiment.add_figure(
-                        f"{self.target_names[idx]} {name}",
-                        f,
-                        global_step=self.global_step,
-                    )
+                    if isinstance(self.logger, TensorBoardLogger):
+                        self.logger.experiment.add_figure(
+                            f"{self.target_names[idx]} {name}",
+                            f,
+                            global_step=self.global_step,
+                        )
                 else:
-                    self.logger.experiment.add_figure(
-                        name,
-                        fig,
-                        global_step=self.global_step,
-                    )
+                    if isinstance(self.logger, TensorBoardLogger):
+                        self.logger.experiment.add_figure(
+                            name,
+                            fig,
+                            global_step=self.global_step,
+                        )

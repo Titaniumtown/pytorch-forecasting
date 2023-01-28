@@ -6,6 +6,7 @@ from typing import Dict, List, Tuple, Union
 
 from matplotlib import pyplot as plt
 import numpy as np
+from pytorch_lightning.loggers import TensorBoardLogger
 import torch
 from torch import nn
 from torchmetrics import Metric as LightningMetric
@@ -817,9 +818,10 @@ class TemporalFusionTransformer(BaseModelWithCovariates):
         label = self.current_stage
         # log to tensorboard
         for name, fig in figs.items():
-            self.logger.experiment.add_figure(
-                f"{label.capitalize()} {name} importance", fig, global_step=self.global_step
-            )
+            if isinstance(self.logger, TensorBoardLogger):
+                self.logger.experiment.add_figure(
+                    f"{label.capitalize()} {name} importance", fig, global_step=self.global_step
+                )
 
         # log lengths of encoder/decoder
         for type in ["encoder", "decoder"]:
@@ -839,9 +841,10 @@ class TemporalFusionTransformer(BaseModelWithCovariates):
             ax.set_ylabel("Number of samples")
             ax.set_title(f"{type.capitalize()} length distribution in {label} epoch")
 
-            self.logger.experiment.add_figure(
-                f"{label.capitalize()} {type} length distribution", fig, global_step=self.global_step
-            )
+           if isinstance(self.logger, TensorBoardLogger):
+                self.logger.experiment.add_figure(
+                    f"{label.capitalize()} {type} length distribution", fig, global_step=self.global_step
+                )
 
     def log_embeddings(self):
         """
