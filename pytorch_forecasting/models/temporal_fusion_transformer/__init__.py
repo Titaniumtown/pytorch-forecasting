@@ -841,7 +841,7 @@ class TemporalFusionTransformer(BaseModelWithCovariates):
             ax.set_ylabel("Number of samples")
             ax.set_title(f"{type.capitalize()} length distribution in {label} epoch")
 
-           if isinstance(self.logger, TensorBoardLogger):
+            if isinstance(self.logger, TensorBoardLogger):
                 self.logger.experiment.add_figure(
                     f"{label.capitalize()} {type} length distribution", fig, global_step=self.global_step
                 )
