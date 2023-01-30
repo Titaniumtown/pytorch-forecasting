@@ -86,6 +86,7 @@ class Ranger(Optimizer):
             N_sma_threshhold=N_sma_threshhold,
             eps=eps,
             weight_decay=weight_decay,
+            radam_buffer = [[None, None, None] for ind in range(10)] # radam_buffer needs to be set to in defaults for it to updated in state dict
         )
         super().__init__(params, defaults)
 
@@ -130,6 +131,7 @@ class Ranger(Optimizer):
 
     def __setstate__(self, state: dict) -> None:
         super().__setstate__(state)
+        state = state['param_groups'][0]
         self.radam_buffer = state['state']["radam_buffer"]
         self.alpha = state['state']["alpha"]
         self.k = state['state']["k"]
