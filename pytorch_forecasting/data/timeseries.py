@@ -1669,7 +1669,7 @@ class TimeSeriesDataSet(Dataset):
                 decoder_length=decoder_length,
                 encoder_target=encoder_target,
                 encoder_time_idx_start=time[0],
-                # groups=groups,
+                groups=groups,
                 target_scale=target_scale,
             ),
             (target, weight),
