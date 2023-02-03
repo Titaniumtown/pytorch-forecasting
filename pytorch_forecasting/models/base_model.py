@@ -831,13 +831,15 @@ class BaseModel(InitialParameterRepresenterMixIn, LightningModule, TupleOutputMi
                     ax.fill_between(x_pred, y_quantile[:, i], y_quantile[:, -i - 1], alpha=0.15, fc=pred_color)
                 else:
                     quantiles = torch.tensor([[y_quantile[0, i]], [y_quantile[0, -i - 1]]])
-                    ax.errorbar(
-                        x_pred,
-                        y[[-n_pred]],
-                        yerr=quantiles - y[-n_pred],
-                        c=pred_color,
-                        capsize=1.0,
-                    )
+                    yerr = quantiles - y[-n_pred]
+                    if yerr > 0:
+                        ax.errorbar(
+                            x_pred,
+                            y[[-n_pred]],
+                            yerr=quantiles - y[-n_pred],
+                            c=pred_color,
+                            capsize=1.0,
+                        )
 
             if add_loss_to_title is not False:
                 if isinstance(add_loss_to_title, bool):
