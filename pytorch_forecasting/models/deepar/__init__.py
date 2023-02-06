@@ -124,12 +124,12 @@ class DeepAR(AutoRegressiveBaseModelWithCovariates):
         # store loss function separately as it is a module
         super().__init__(loss=loss, logging_metrics=logging_metrics, **kwargs)
 
-        # self.embeddings = MultiEmbedding(
-        #     embedding_sizes=embedding_sizes,
-        #     embedding_paddings=embedding_paddings,
-        #     categorical_groups=categorical_groups,
-        #     x_categoricals=x_categoricals,
-        # )
+        self.embeddings = MultiEmbedding(
+            embedding_sizes=embedding_sizes,
+            embedding_paddings=embedding_paddings,
+            categorical_groups=categorical_groups,
+            x_categoricals=x_categoricals,
+        )
 
         lagged_target_names = [l for lags in target_lags.values() for l in lags]
         assert set(self.encoder_variables) - set(to_list(target)) - set(lagged_target_names) == set(
@@ -145,9 +145,8 @@ class DeepAR(AutoRegressiveBaseModelWithCovariates):
 
         rnn_class = get_rnn(cell_type)
         cont_size = len(self.reals)
-        # cat_size = sum(self.embeddings.output_size.values())
-        # input_size = cont_size + cat_size
-        input_size = cont_size
+        cat_size = sum(self.embeddings.output_size.values())
+        input_size = cont_size + cat_size
         self.rnn = rnn_class(
             input_size=input_size,
             hidden_size=self.hparams.hidden_size,
@@ -207,18 +206,17 @@ class DeepAR(AutoRegressiveBaseModelWithCovariates):
         Args:
             one_off_target: tensor to insert into first position of target. If None (default), remove first time step.
         """
-        # # create input vector
-        # if len(self.categoricals) > 0:
-        #     embeddings = self.embeddings(x_cat)
-        #     flat_embeddings = torch.cat([emb for emb in embeddings.values()], dim=-1)
-        #     input_vector = flat_embeddings
+        # create input vector
+        if len(self.categoricals) > 0:
+            embeddings = self.embeddings(x_cat)
+            flat_embeddings = torch.cat([emb for emb in embeddings.values()], dim=-1)
+            input_vector = flat_embeddings
 
         if len(self.reals) > 0:
             input_vector = x_cont.clone()
 
         if len(self.reals) > 0 and len(self.categoricals) > 0:
-            # input_vector = torch.cat([x_cont, flat_embeddings], dim=-1)
-            input_vector = torch.cat(x_cont, dim=-1)
+            input_vector = torch.cat([x_cont, flat_embeddings], dim=-1)
 
         # shift target by one
         input_vector[..., self.target_positions] = torch.roll(
